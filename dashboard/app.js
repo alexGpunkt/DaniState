@@ -535,13 +535,19 @@ function requestDeleteSession(sessionId) {
     message: `Die Teilnahme „${session.participant_code}“ und sämtliche zugehörigen Antworten werden unwiderruflich aus der Datenbank gelöscht.`,
     phrase: session.participant_code,
     action: async () => {
-      const { error } = await db.from("assessment_sessions").delete().eq("id", sessionId);
+      const { data, error } = await db.rpc("delete_assessment_session", {
+        p_session_id: sessionId
+      });
       if (error) throw error;
+      if (Number(data) !== 1) {
+        throw new Error(`Unerwartete Rückmeldung der Datenbank: ${JSON.stringify(data)}`);
+      }
       if (selectedSessionId === sessionId) {
         selectedSessionId = null;
         $("detail").classList.add("hidden");
       }
       await load();
+      return `Die Teilnahme „${session.participant_code}“ und ihre Antworten wurden gelöscht.`;
     }
   });
 }
@@ -556,11 +562,14 @@ function requestDeleteAll() {
     message: `Es werden ${sessions.length} Teilnahmen und alle zugehörigen Antworten unwiderruflich gelöscht. Admin-Konten und die Tabellenstruktur bleiben erhalten.`,
     phrase: "ALLE LÖSCHEN",
     action: async () => {
-      const { error } = await db.rpc("delete_all_assessment_data");
+      const { data, error } = await db.rpc("delete_all_assessment_data_v2");
       if (error) throw error;
       selectedSessionId = null;
       $("detail").classList.add("hidden");
       await load();
+      const deletedSessions = Number(data?.deleted_sessions ?? 0);
+      const deletedResponses = Number(data?.deleted_responses ?? 0);
+      return `${deletedSessions} Teilnahmen und ${deletedResponses} Antworten wurden gelöscht.`;
     }
   });
 }
@@ -588,13 +597,16 @@ async function executeConfirmedDelete(event) {
   $("confirmDeleteBtn").disabled = true;
   $("confirmError").textContent = "Löschung läuft …";
   try {
-    await pendingDeleteAction.action();
+    const successMessage = await pendingDeleteAction.action();
     pendingDeleteAction = null;
     $("confirmDialog").close();
-    $("tableStatus").textContent = "Die ausgewählten Daten wurden gelöscht.";
+    $("tableStatus").textContent = successMessage || "Die ausgewählten Daten wurden gelöscht.";
   } catch (error) {
-    console.error(error);
-    $("confirmError").textContent = `Löschen fehlgeschlagen: ${error.message}`;
+    console.error("Supabase-Löschfehler:", error);
+    const details = [error.message, error.details, error.hint, error.code]
+      .filter(Boolean)
+      .join(" · ");
+    $("confirmError").textContent = `Löschen fehlgeschlagen: ${details || "Unbekannter Datenbankfehler"}`;
     $("confirmDeleteBtn").disabled = false;
   }
 }
