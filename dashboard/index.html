@@ -1,11 +1,137 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Auswertungs-Dashboard</title><link rel="stylesheet" href="styles.css"></head><body><main class="wrap">
-<header><div><h1>Auswertungs-Dashboard</h1><div class="muted">Aktualisiert sich live über Supabase Realtime</div></div><button id="logoutBtn" class="danger hidden">Abmelden</button></header>
-<section id="loginCard" class="card"><h2>Admin-Anmeldung</h2><p><input id="email" type="email" placeholder="E-Mail"> <input id="password" type="password" placeholder="Passwort"> <button id="loginBtn" class="primary">Anmelden</button></p><p id="loginStatus" class="muted"></p></section>
-<section id="app" class="hidden">
-<div class="warn"><strong>Interpretationsgrenze:</strong> Hohe Werte zeigen stärkere belastungsnahe Antwortmuster in dieser Erhebung. Sie beweisen weder ein Trauma noch dessen Ursache und ersetzen keine klinische Diagnostik.</div>
-<div id="summary" class="grid"></div>
-<div class="card"><h2>Teilnahmen</h2><div class="tablewrap"><table><thead><tr><th>Code</th><th>Status</th><th>Fortschritt</th><th>Beginn</th></tr></thead><tbody id="sessions"></tbody></table></div></div>
-<div id="detail" class="card hidden"><h2 id="detailTitle"></h2><div id="dimensions"></div><h3>Hinweistext</h3><p id="interpretation"></p></div>
-</section></main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Auswertungs-Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main class="wrap">
+  <header class="page-header">
+    <div>
+      <h1>Auswertungs-Dashboard</h1>
+      <div class="muted">Live-Daten aus Supabase · Auswertung auf Deutsch</div>
+    </div>
+    <button id="logoutBtn" class="button danger hidden">Abmelden</button>
+  </header>
+
+  <section id="loginCard" class="card login-card">
+    <h2>Admin-Anmeldung</h2>
+    <div class="login-row">
+      <input id="email" type="email" autocomplete="username" placeholder="E-Mail">
+      <input id="password" type="password" autocomplete="current-password" placeholder="Passwort">
+      <button id="loginBtn" class="button primary">Anmelden</button>
+    </div>
+    <p id="loginStatus" class="muted" aria-live="polite"></p>
+  </section>
+
+  <section id="app" class="hidden">
+    <div class="warn">
+      <strong>Interpretationsgrenze:</strong> Die Werte beschreiben ausschließlich Antwortmuster in dieser nicht validierten Erhebung. Sie beweisen weder ein Trauma noch dessen Ursache und ersetzen keine fachpsychologische Diagnostik.
+    </div>
+
+    <div id="summary" class="summary-grid"></div>
+
+    <section class="card">
+      <div class="section-heading">
+        <div>
+          <h2>Teilnahmen</h2>
+          <p class="muted">Eine Teilnahme öffnen, um die bereichsbezogene Auswertung und auf Wunsch jede Einzelantwort einzusehen.</p>
+        </div>
+        <button id="deleteAllBtn" class="button danger-outline">Alle Teilnahmen löschen</button>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Status</th>
+              <th>Fortschritt</th>
+              <th>Höchster Bereichswert</th>
+              <th>Beginn</th>
+              <th>Aktionen</th>
+            </tr>
+          </thead>
+          <tbody id="sessions"></tbody>
+        </table>
+      </div>
+      <p id="tableStatus" class="muted" aria-live="polite"></p>
+    </section>
+
+    <section id="detail" class="hidden">
+      <div class="card profile-header-card">
+        <div class="section-heading">
+          <div>
+            <button id="backBtn" class="button ghost">← Zurück zur Übersicht</button>
+            <h2 id="detailTitle"></h2>
+            <p id="detailMeta" class="muted"></p>
+          </div>
+          <button id="deleteSessionBtn" class="button danger">Diese Teilnahme löschen</button>
+        </div>
+      </div>
+
+      <div id="profileSummary" class="card"></div>
+
+      <section class="card">
+        <div class="section-heading">
+          <div>
+            <h2>Auswertung nach Lebensbereichen</h2>
+            <p class="muted">Jeder Bereich basiert auf vier Szenarien. Die Interpretation berücksichtigt Mittelwert, hohe Einzelantworten und Streuung.</p>
+          </div>
+        </div>
+        <div id="dimensions" class="dimension-grid"></div>
+      </section>
+
+      <section class="card">
+        <div class="section-heading">
+          <div>
+            <h2>Einzelantworten</h2>
+            <p class="muted">Die spanischen Originalfragen und die jeweils gewählte Antwort werden nur bei Bedarf eingeblendet.</p>
+          </div>
+          <button id="toggleAnswersBtn" class="button secondary" aria-expanded="false">Einzelantworten anzeigen</button>
+        </div>
+        <div id="answersPanel" class="hidden">
+          <div class="answer-controls">
+            <label>
+              Bereich filtern
+              <select id="answerFilter"></select>
+            </label>
+            <label>
+              Sortierung
+              <select id="answerSort">
+                <option value="question">Fragennummer</option>
+                <option value="score-desc">höchste Belastungsnähe zuerst</option>
+                <option value="score-asc">niedrigste Belastungsnähe zuerst</option>
+              </select>
+            </label>
+          </div>
+          <div id="answersList" class="answers-list"></div>
+        </div>
+      </section>
+    </section>
+  </section>
+</main>
+
+<dialog id="confirmDialog" class="confirm-dialog">
+  <form method="dialog" id="confirmForm">
+    <h2 id="confirmTitle">Löschen bestätigen</h2>
+    <p id="confirmMessage"></p>
+    <label class="confirm-label">
+      Zur Bestätigung eingeben: <strong id="confirmPhrase"></strong>
+      <input id="confirmInput" autocomplete="off">
+    </label>
+    <p id="confirmError" class="error-text" aria-live="polite"></p>
+    <div class="dialog-actions">
+      <button type="button" id="cancelConfirmBtn" class="button secondary">Abbrechen</button>
+      <button type="button" id="confirmDeleteBtn" class="button danger">Endgültig löschen</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="questions.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
