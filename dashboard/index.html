@@ -1,0 +1,11 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Auswertungs-Dashboard</title><link rel="stylesheet" href="styles.css"></head><body><main class="wrap">
+<header><div><h1>Auswertungs-Dashboard</h1><div class="muted">Aktualisiert sich live über Supabase Realtime</div></div><button id="logoutBtn" class="danger hidden">Abmelden</button></header>
+<section id="loginCard" class="card"><h2>Admin-Anmeldung</h2><p><input id="email" type="email" placeholder="E-Mail"> <input id="password" type="password" placeholder="Passwort"> <button id="loginBtn" class="primary">Anmelden</button></p><p id="loginStatus" class="muted"></p></section>
+<section id="app" class="hidden">
+<div class="warn"><strong>Interpretationsgrenze:</strong> Hohe Werte zeigen stärkere belastungsnahe Antwortmuster in dieser Erhebung. Sie beweisen weder ein Trauma noch dessen Ursache und ersetzen keine klinische Diagnostik.</div>
+<div id="summary" class="grid"></div>
+<div class="card"><h2>Teilnahmen</h2><div class="tablewrap"><table><thead><tr><th>Code</th><th>Status</th><th>Fortschritt</th><th>Beginn</th></tr></thead><tbody id="sessions"></tbody></table></div></div>
+<div id="detail" class="card hidden"><h2 id="detailTitle"></h2><div id="dimensions"></div><h3>Hinweistext</h3><p id="interpretation"></p></div>
+</section></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="app.js"></script></body></html>
