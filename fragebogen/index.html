@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Situaciones y decisiones</title><link rel="stylesheet" href="styles.css"></head>
+<body><main class="app">
+<section id="startScreen" class="screen start"><div class="card start"><div class="content">
+<h1>Situaciones y decisiones</h1>
+<div class="notice"><strong>Antes de empezar:</strong> Esto no es un diagnóstico psicológico y no puede confirmar si existe un trauma ni qué lo causó. Solo recoge cómo reaccionas hoy ante distintas situaciones. Si estás en peligro ahora mismo o estás pensando en hacerte daño, llama de inmediato al 112 o busca ayuda de crisis en tu zona.</div>
+<label class="field">Código de participante que tú elijas<input id="participantCode" maxlength="40" autocomplete="off" placeholder="Por ejemplo: P-104"></label>
+<label class="consent"><input id="consent" type="checkbox"> <span>Participo por decisión propia, sé para qué se hace este cuestionario y entiendo que mis respuestas sensibles se guardarán con un código, sin usar mi nombre.</span></label>
+<p><button id="startBtn" class="primary">Empezar</button></p>
+<p id="startStatus" class="status"></p>
+</div></div></section>
+<section id="questionScreen" class="hidden" style="height:100%;display:flex;flex-direction:column">
+<header class="topbar"><div class="brand">Situaciones y decisiones</div><div id="remaining" class="remaining">Quedan 60</div></header>
+<div class="progress"><div id="progressBar"></div></div>
+<div class="screen"><article class="card">
+<div id="dimension" class="meta"></div><h2 id="scenario" class="scenario"></h2><div id="options" class="options"></div>
+<div class="bottom"><span id="saveStatus" class="status">Tu respuesta se guarda al momento.</span><button id="deferBtn" class="secondary">Responder más tarde</button></div>
+</article></div></section>
+<section id="completeScreen" class="screen complete hidden"><div class="card complete"><div><h1>¡Gracias!</h1><p>Has respondido todas las preguntas y tus respuestas se han guardado.</p><p id="finalStatus" class="status"></p></div></div></section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="questions.js"></script><script src="app.js"></script>
+</body></html>
